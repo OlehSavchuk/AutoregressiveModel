@@ -9,7 +9,8 @@ and the network is trained by minimising the reverse KL divergence against the l
 |---|---|
 | `madesym.ipynb` | original notebook (TFP `AutoregressiveNetwork`, one full network call per site when sampling) |
 | `madesym_fast.ipynb` | same model with a hand-written masked layer and an incremental sampler (details below) |
-| `make_figures.py` | NumPy/matplotlib only; regenerates everything in `figures/` |
+| `make_figures.py` | NumPy/matplotlib only; structure, sampling-cost and Metropolis-reference figures |
+| `density_comparison.py` | NumPy-only density comparison (Gaussian vs autoregressive mixtures), ~2 min |
 
 ## Model
 
@@ -25,6 +26,19 @@ score-function (REINFORCE) gradient.
 ![MADE structure](figures/fig_made_structure.png)
 
 Masks make output site *i* depend only on inputs *j < i* (right panel, checked numerically in `make_figures.py`).
+
+## Reproducing the density
+
+The point of the model is to represent the multimodal distribution of the field. The figure compares the Metropolis reference
+with the best unimodal model (a multivariate Gaussian) and with autoregressive networks with one or two Gaussians per site.
+It is made by `density_comparison.py` (NumPy only, hand-written backprop, trained by **maximum likelihood on Metropolis samples**,
+not by the reverse KL used in the notebooks, so it illustrates the architecture rather than reproducing notebook results).
+
+![density comparison](figures/fig_density_comparison.png)
+
+The one-site field distribution is bimodal at about ±√2; the Gaussian cannot represent it, and the two-Gaussian autoregressive
+model follows it closely. Held-out negative log-likelihood per configuration: Gaussian 52.3, AR with 1 Gaussian per site 50.5,
+AR with 2 Gaussians per site 49.8. The magnetisation and two-point panels are reproduced only approximately by all models.
 
 ## What was slow, and the fix
 
